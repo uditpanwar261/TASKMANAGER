@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if mode == 'login' %}Sign In{% else %}Create Account{% endif %} — TeamTask</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f7f5;
+      --surface: #ffffff;
+      --border: #e5e5e3;
+      --text: #1a1a1a;
+      --muted: #767676;
+      --accent: #1a1a1a;
+      --accent-hover: #333;
+      --error: #dc3545;
+      --success: #198754;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .auth-wrapper {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+      justify-content: center;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 32px;
+    }
+
+    .auth-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+      letter-spacing: -0.3px;
+    }
+
+    .auth-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      height: 42px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      background: var(--surface);
+    }
+
+    .btn {
+      width: 100%;
+      height: 44px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.15s, transform 0.1s;
+      letter-spacing: 0.1px;
+    }
+
+    .btn:hover { background: var(--accent-hover); }
+    .btn:active { transform: scale(0.99); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .switch-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .switch-link a {
+      color: var(--text);
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    .switch-link a:hover { text-decoration: underline; }
+
+    .error-msg {
+      background: #fff5f5;
+      border: 1px solid #ffc9c9;
+      color: var(--error);
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .error-msg.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="brand">
+      <div class="brand-icon">✓</div>
+      <span class="brand-name">TeamTask</span>
+    </div>
+
+    <div class="auth-card">
+      {% if mode == 'login' %}
+      <h1 class="auth-title">Welcome back</h1>
+      <p class="auth-subtitle">Sign in to your workspace</p>
+      {% else %}
+      <h1 class="auth-title">Create account</h1>
+      <p class="auth-subtitle">Start managing tasks with your team</p>
+      {% endif %}
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      {% if mode == 'signup' %}
+      <div class="form-group">
+        <label>Full name</label>
+        <input type="text" id="name" placeholder="Alex Johnson" autocomplete="name">
+      </div>
+      {% endif %}
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="{% if mode == 'signup' %}At least 6 characters{% else %}Your password{% endif %}" autocomplete="{% if mode == 'login' %}current-password{% else %}new-password{% endif %}">
+      </div>
+
+      <button class="btn" id="submitBtn">
+        {% if mode == 'login' %}Sign in{% else %}Create account{% endif %}
+      </button>
+
+      <div class="switch-link">
+        {% if mode == 'login' %}
+        Don't have an account? <a href="/signup">Sign up</a>
+        {% else %}
+        Already have an account? <a href="/login">Sign in</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const mode = '{{ mode }}';
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMsg = document.getElementById('errorMsg');
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.classList.add('show');
+    }
+
+    async function handleSubmit() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const body = { email, password };
+
+      if (mode === 'signup') {
+        body.name = document.getElementById('name').value.trim();
+        if (!body.name) return showError('Please enter your name');
+      }
+      if (!email) return showError('Please enter your email');
+      if (!password) return showError('Please enter your password');
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = mode === 'login' ? 'Signing in...' : 'Creating account...';
+      errorMsg.classList.remove('show');
+
+      try {
+        const res = await fetch(mode === 'login' ? '/login' : '/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (data.success) {
+          window.location.href = data.redirect;
+        } else {
+          showError(data.error || 'Something went wrong');
+          submitBtn.disabled = false;
+          submitBtn.textContent = mode === 'login' ? 'Sign in' : 'Create account';
+        }
+      } catch {
+        showError('Network error. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = mode === 'login' ? 'Sign in' : 'Create account';
+      }
+    }
+
+    submitBtn.addEventListener('click', handleSubmit);
+    document.addEventListener('keypress', e => { if (e.key === 'Enter') handleSubmit(); });
+  </script>
+</body>
+</html>

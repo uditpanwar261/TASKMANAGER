@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ project.name }} — TeamTask</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f7f7f5;
+      --surface: #ffffff;
+      --border: #e5e5e3;
+      --text: #1a1a1a;
+      --muted: #767676;
+      --accent: #1a1a1a;
+      --high: #ef4444;
+      --high-bg: #fef2f2;
+      --medium-bg: #f8f8f8;
+      --low: #22c55e;
+      --low-bg: #f0fdf4;
+      --radius: 12px;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* NAV */
+    nav {
+      height: 60px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
+    .brand-icon { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; }
+    .brand-name { font-size: 16px; font-weight: 600; letter-spacing: -0.2px; }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 32px; height: 32px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 600; }
+    .avatar-sm { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: white; background: var(--accent); }
+    .nav-link { font-size: 13px; color: var(--muted); text-decoration: none; padding: 6px 12px; border-radius: 7px; }
+    .nav-link:hover { background: var(--bg); color: var(--text); }
+
+    /* BREADCRUMB */
+    .breadcrumb { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+    .breadcrumb a { color: var(--muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--text); }
+
+    /* LAYOUT */
+    .container { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+
+    .project-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .project-title { font-size: 24px; font-weight: 600; letter-spacing: -0.4px; }
+    .project-desc { font-size: 14px; color: var(--muted); margin-top: 4px; }
+    .project-meta { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+    .member-avatars { display: flex; gap: 4px; }
+
+    .role-tag { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .role-admin { background: #1a1a1a; color: white; }
+    .role-member { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+
+    /* TABS */
+    .tabs { display: flex; gap: 2px; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .tab-btn {
+      padding: 10px 16px; font-size: 13px; font-weight: 500;
+      color: var(--muted); background: none; border: none;
+      cursor: pointer; border-bottom: 2px solid transparent;
+      transition: color 0.15s; margin-bottom: -1px;
+      font-family: inherit;
+    }
+    .tab-btn.active { color: var(--text); border-bottom-color: var(--text); }
+    .tab-btn:hover { color: var(--text); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* NEW TASK FORM */
+    .new-task-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .new-task-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .new-task-sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+
+    .task-form-row {
+      display: flex; gap: 12px; align-items: flex-end;
+    }
+
+    .task-form-row input[type="text"] {
+      flex: 1;
+      height: 42px; padding: 0 14px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: inherit; font-size: 14px; color: var(--text);
+      background: var(--bg); outline: none;
+      transition: border-color 0.15s;
+    }
+    .task-form-row input:focus { border-color: var(--accent); background: var(--surface); }
+
+    select {
+      height: 42px; padding: 0 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: inherit; font-size: 13px; color: var(--text);
+      background: var(--bg); outline: none; cursor: pointer;
+      min-width: 130px;
+      transition: border-color 0.15s;
+    }
+    select:focus { border-color: var(--accent); }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 42px; padding: 0 18px;
+      background: var(--accent); color: white;
+      border: none; border-radius: 8px;
+      font-family: inherit; font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: background 0.15s; white-space: nowrap;
+    }
+    .btn:hover { background: #333; }
+    .btn-sm { height: 32px; padding: 0 12px; font-size: 12px; }
+    .btn-danger { background: #dc3545; }
+    .btn-danger:hover { background: #b02a37; }
+    .btn-ghost {
+      height: 42px; padding: 0 16px;
+      background: none; border: 1px solid var(--border);
+      border-radius: 8px; font-family: inherit; font-size: 13px;
+      cursor: pointer; transition: background 0.15s; color: var(--text);
+    }
+    .btn-ghost:hover { background: var(--bg); }
+
+    /* FILTER TABS */
+    .filter-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+    .filter-tab {
+      padding: 6px 14px; font-size: 13px; font-weight: 500;
+      border-radius: 20px; cursor: pointer; border: 1px solid var(--border);
+      background: none; font-family: inherit; color: var(--muted);
+      transition: all 0.15s;
+    }
+    .filter-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+    .filter-tab:hover:not(.active) { border-color: var(--accent); color: var(--text); }
+
+    /* TASK ITEMS */
+    .task-list { display: flex; flex-direction: column; gap: 2px; }
+
+    .task-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .task-row:hover { border-color: #ccc; }
+
+    .task-check {
+      width: 20px; height: 20px;
+      border: 1.5px solid var(--border);
+      border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .task-check:hover { border-color: var(--accent); }
+    .task-check.done { background: var(--accent); border-color: var(--accent); color: white; }
+    .task-check.in-progress { border-color: #3b82f6; color: #3b82f6; }
+
+    .task-info { flex: 1; min-width: 0; }
+    .task-name {
+      font-size: 14px; font-weight: 500;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .task-name.done { text-decoration: line-through; color: var(--muted); }
+    .task-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .task-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+    .priority-badge {
+      font-size: 10px; font-weight: 600;
+      padding: 3px 8px; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .priority-high { background: var(--high-bg); color: var(--high); }
+    .priority-medium { background: var(--medium-bg); color: #666; border: 1px solid var(--border); }
+    .priority-low { background: var(--low-bg); color: #166534; }
+
+    .overdue-tag { font-size: 10px; color: #ef4444; font-weight: 500; }
+
+    .delete-btn {
+      width: 28px; height: 28px; border-radius: 7px;
+      background: none; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 14px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .delete-btn:hover { background: #fef2f2; color: #ef4444; }
+
+    .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); font-size: 14px; }
+    .empty-icon { font-size: 32px; margin-bottom: 8px; }
+
+    /* MEMBERS PANEL */
+    .members-grid { display: flex; flex-direction: column; gap: 8px; }
+    .member-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    }
+    .member-info { flex: 1; }
+    .member-name { font-size: 14px; font-weight: 500; }
+    .member-email { font-size: 12px; color: var(--muted); }
+    .member-actions { display: flex; align-items: center; gap: 8px; }
+
+    /* INVITE FORM */
+    .invite-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px; margin-bottom: 20px;
+    }
+    .invite-row { display: flex; gap: 10px; align-items: flex-end; }
+    .invite-row input { flex: 1; height: 42px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px; background: var(--bg); outline: none; }
+    .invite-row input:focus { border-color: var(--accent); background: var(--surface); }
+
+    /* MODAL */
+    .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; align-items: center; justify-content: center; }
+    .modal-backdrop.open { display: flex; }
+    .modal { background: var(--surface); border-radius: var(--radius); padding: 28px; width: 480px; max-width: 95vw; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+    .modal-title { font-size: 17px; font-weight: 600; margin-bottom: 20px; }
+    .form-group { margin-bottom: 14px; }
+    label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+    input[type="text"], input[type="date"], input[type="email"], textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+      border-radius: 8px; font-family: inherit; font-size: 14px;
+      color: var(--text); background: var(--bg); outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus, textarea:focus { border-color: var(--accent); background: var(--surface); }
+    textarea { height: 80px; resize: vertical; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+    .error-msg { background: #fff5f5; border: 1px solid #ffc9c9; color: #dc3545; font-size: 12px; padding: 8px 12px; border-radius: 7px; margin-bottom: 14px; display: none; }
+    .error-msg.show { display: block; }
+    .success-msg { background: #f0fdf4; border: 1px solid #86efac; color: #166534; font-size: 12px; padding: 8px 12px; border-radius: 7px; margin-bottom: 14px; display: none; }
+    .success-msg.show { display: block; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="brand" href="/dashboard">
+      <div class="brand-icon">✓</div>
+      <span class="brand-name">TeamTask</span>
+    </a>
+    <div class="nav-right">
+      <div class="avatar" title="{{ user.name }}">{{ user.initials }}</div>
+      <a class="nav-link" href="/logout">Logout</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="breadcrumb" style="margin-bottom:16px;">
+      <a href="/dashboard">Dashboard</a>
+      <span>›</span>
+      <span>{{ project.name }}</span>
+    </div>
+
+    <div class="project-header">
+      <div>
+        <h1 class="project-title">{{ project.name }}</h1>
+        {% if project.description %}
+        <p class="project-desc">{{ project.description }}</p>
+        {% endif %}
+        <div class="project-meta">
+          <div class="member-avatars">
+            {% for m in members %}
+            <div class="avatar-sm" title="{{ m.user.name }} ({{ m.role }})">{{ m.user.initials }}</div>
+            {% endfor %}
+          </div>
+          <span class="role-tag role-{{ role | lower }}">{{ role }}</span>
+        </div>
+      </div>
+      {% if role == 'Admin' %}
+      <button class="btn btn-danger btn-sm" onclick="confirmDeleteProject()">Delete project</button>
+      {% endif %}
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('tasks')">Tasks ({{ tasks | length }})</button>
+      <button class="tab-btn" onclick="switchTab('members')">Members ({{ members | length }})</button>
+    </div>
+
+    <!-- Tasks Panel -->
+    <div class="tab-panel active" id="tab-tasks">
+      <!-- New Task -->
+      <div class="new-task-card">
+        <div class="new-task-title">New task</div>
+        <div class="new-task-sub">Add a task and assign it to a teammate.</div>
+        <div class="task-form-row">
+          <input type="text" id="taskTitle" placeholder="What needs to be done?" autocomplete="off">
+          <select id="taskAssignee">
+            <option value="">Unassigned</option>
+            {% for m in members %}
+            <option value="{{ m.user.id }}">{{ m.user.name }}</option>
+            {% endfor %}
+          </select>
+          <select id="taskPriority">
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+            <option value="Low">Low</option>
+          </select>
+          <button class="btn" onclick="createTask()">+ Add</button>
+        </div>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterTasks('all', this)">All ({{ tasks | length }})</button>
+        <button class="filter-tab" onclick="filterTasks('To Do', this)">To Do ({{ todo_tasks | length }})</button>
+        <button class="filter-tab" onclick="filterTasks('In Progress', this)">In Progress ({{ inprog_tasks | length }})</button>
+        <button class="filter-tab" onclick="filterTasks('Done', this)">Done ({{ done_tasks | length }})</button>
+      </div>
+
+      <!-- Task List -->
+      <div class="task-list" id="taskList">
+        {% if tasks %}
+          {% for task in tasks %}
+          <div class="task-row" data-status="{{ task.status }}" data-id="{{ task.id }}">
+            <div class="task-check {% if task.status == 'Done' %}done{% elif task.status == 'In Progress' %}in-progress{% endif %}"
+                 onclick="cycleStatus(event, {{ task.id }}, '{{ task.status }}')" title="Click to change status">
+              {% if task.status == 'Done' %}✓{% elif task.status == 'In Progress' %}⟳{% endif %}
+            </div>
+            <div class="task-info">
+              <div class="task-name {% if task.status == 'Done' %}done{% endif %}">{{ task.title }}</div>
+              <div class="task-sub">
+                {% if task.assignee %}{{ task.assignee.name }}{% else %}Unassigned{% endif %}
+                {% if task.due_date %} · Due {{ task.due_date.strftime('%b %d') }}{% endif %}
+                {% if task.is_overdue %} <span class="overdue-tag">· Overdue</span>{% endif %}
+              </div>
+            </div>
+            <div class="task-right">
+              <span class="priority-badge priority-{{ task.priority | lower }}">{{ task.priority }}</span>
+              <span class="avatar-sm" title="{% if task.assignee %}{{ task.assignee.name }}{% else %}Unassigned{% endif %}">
+                {% if task.assignee %}{{ task.assignee.initials }}{% else %}—{% endif %}
+              </span>
+              <button class="delete-btn" onclick="deleteTask(event, {{ task.id }})" title="Delete">🗑</button>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            No tasks yet. Add your first task above!
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Members Panel -->
+    <div class="tab-panel" id="tab-members">
+      {% if role == 'Admin' %}
+      <div class="invite-card">
+        <div class="new-task-title" style="margin-bottom:4px;">Invite teammate</div>
+        <div class="new-task-sub">Add a member by their email address.</div>
+        <div class="success-msg" id="inviteSuccess"></div>
+        <div class="error-msg" id="inviteError"></div>
+        <div class="invite-row">
+          <input type="email" id="inviteEmail" placeholder="teammate@example.com">
+          <select id="inviteRole">
+            <option value="Member">Member</option>
+            <option value="Admin">Admin</option>
+          </select>
+          <button class="btn" onclick="inviteMember()">Invite</button>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="members-grid" id="membersGrid">
+        {% for m in members %}
+        <div class="member-row" id="member-{{ m.user.id }}">
+          <div class="avatar-sm">{{ m.user.initials }}</div>
+          <div class="member-info">
+            <div class="member-name">{{ m.user.name }}{% if m.user.id == user.id %} (you){% endif %}</div>
+            <div class="member-email">{{ m.user.email }}</div>
+          </div>
+          <div class="member-actions">
+            <span class="role-tag role-{{ m.role | lower }}">{{ m.role }}</span>
+            {% if role == 'Admin' and m.user.id != user.id %}
+            <button class="delete-btn" onclick="removeMember({{ m.user.id }})" title="Remove">🗑</button>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PROJECT_ID = {{ project.id }};
+
+    // Tabs
+    function switchTab(name) {
+      document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', ['tasks','members'][i] === name));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === `tab-${name}`));
+    }
+
+    // Filter
+    function filterTasks(status, btn) {
+      document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.task-row').forEach(row => {
+        row.style.display = (status === 'all' || row.dataset.status === status) ? '' : 'none';
+      });
+    }
+
+    // Create Task
+    async function createTask() {
+      const title = document.getElementById('taskTitle').value.trim();
+      const assigned_to = document.getElementById('taskAssignee').value;
+      const priority = document.getElementById('taskPriority').value;
+
+      if (!title) { document.getElementById('taskTitle').focus(); return; }
+
+      const res = await fetch(`/projects/${PROJECT_ID}/tasks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, assigned_to: assigned_to || null, priority })
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('taskTitle').value = '';
+        const task = data.task;
+        const list = document.getElementById('taskList');
+        const emptyState = list.querySelector('.empty-state');
+        if (emptyState) emptyState.remove();
+
+        const row = document.createElement('div');
+        row.className = 'task-row';
+        row.dataset.status = task.status;
+        row.dataset.id = task.id;
+        row.innerHTML = `
+          <div class="task-check" onclick="cycleStatus(event, ${task.id}, '${task.status}')"></div>
+          <div class="task-info">
+            <div class="task-name">${task.title}</div>
+            <div class="task-sub">${task.assignee_name || 'Unassigned'}${task.due_date ? ' · Due ' + task.due_date : ''}${task.is_overdue ? ' <span class="overdue-tag">· Overdue</span>' : ''}</div>
+          </div>
+          <div class="task-right">
+            <span class="priority-badge priority-${task.priority.toLowerCase()}">${task.priority}</span>
+            <span class="avatar-sm" title="${task.assignee_name || 'Unassigned'}">${task.assignee_initials || '—'}</span>
+            <button class="delete-btn" onclick="deleteTask(event, ${task.id})" title="Delete">🗑</button>
+          </div>
+        `;
+        list.prepend(row);
+      }
+    }
+
+    // Cycle Status
+    async function cycleStatus(event, taskId, currentStatus) {
+      event.stopPropagation();
+      const order = ['To Do', 'In Progress', 'Done'];
+      const next = order[(order.indexOf(currentStatus) + 1) % order.length];
+
+      const res = await fetch(`/tasks/${taskId}/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: next })
+      });
+      const data = await res.json();
+      if (data.success) {
+        const row = document.querySelector(`.task-row[data-id="${taskId}"]`);
+        row.dataset.status = next;
+        const check = row.querySelector('.task-check');
+        const nameEl = row.querySelector('.task-name');
+        check.className = 'task-check' + (next === 'Done' ? ' done' : next === 'In Progress' ? ' in-progress' : '');
+        check.innerHTML = next === 'Done' ? '✓' : next === 'In Progress' ? '⟳' : '';
+        check.setAttribute('onclick', `cycleStatus(event, ${taskId}, '${next}')`);
+        nameEl.classList.toggle('done', next === 'Done');
+      }
+    }
+
+    // Delete Task
+    async function deleteTask(event, taskId) {
+      event.stopPropagation();
+      if (!confirm('Delete this task?')) return;
+      const res = await fetch(`/tasks/${taskId}/delete`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        document.querySelector(`.task-row[data-id="${taskId}"]`).remove();
+      }
+    }
+
+    // Invite Member
+    async function inviteMember() {
+      const email = document.getElementById('inviteEmail').value.trim();
+      const role = document.getElementById('inviteRole').value;
+      const errEl = document.getElementById('inviteError');
+      const succEl = document.getElementById('inviteSuccess');
+      errEl.classList.remove('show');
+      succEl.classList.remove('show');
+
+      if (!email) { errEl.textContent = 'Enter an email'; errEl.classList.add('show'); return; }
+
+      const res = await fetch(`/projects/${PROJECT_ID}/invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, role })
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('inviteEmail').value = '';
+        succEl.textContent = `${data.name} added as ${data.role}`;
+        succEl.classList.add('show');
+        // Add to DOM
+        const grid = document.getElementById('membersGrid');
+        const row = document.createElement('div');
+        row.className = 'member-row';
+        row.innerHTML = `
+          <div class="avatar-sm">${data.initials}</div>
+          <div class="member-info">
+            <div class="member-name">${data.name}</div>
+            <div class="member-email">${email}</div>
+          </div>
+          <div class="member-actions">
+            <span class="role-tag role-${data.role.toLowerCase()}">${data.role}</span>
+          </div>
+        `;
+        grid.appendChild(row);
+      } else {
+        errEl.textContent = data.error;
+        errEl.classList.add('show');
+      }
+    }
+
+    // Remove Member
+    async function removeMember(userId) {
+      if (!confirm('Remove this member from the project?')) return;
+      const res = await fetch(`/projects/${PROJECT_ID}/members/${userId}/remove`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) document.getElementById(`member-${userId}`).remove();
+      else alert(data.error);
+    }
+
+    // Delete Project
+    async function confirmDeleteProject() {
+      if (!confirm('Permanently delete this project and all its tasks?')) return;
+      const res = await fetch(`/projects/${PROJECT_ID}/delete`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) window.location.href = '/dashboard';
+      else alert(data.error);
+    }
+
+    // Enter to add task
+    document.getElementById('taskTitle').addEventListener('keypress', e => {
+      if (e.key === 'Enter') createTask();
+    });
+  </script>
+</body>
+</html>
